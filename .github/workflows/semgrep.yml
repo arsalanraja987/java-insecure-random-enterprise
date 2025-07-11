@@ -15,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Semgrep scan and save results
+      - name: Run Semgrep scan and save SARIF
         uses: returntocorp/semgrep-action@v1
         with:
           config: auto
@@ -24,8 +24,8 @@ jobs:
           SEMGREP_RULES: auto
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
-      - name: Upload Semgrep SARIF report
-        uses: actions/upload-artifact@v3
+      - name: Upload SARIF as artifact
+        uses: actions/upload-artifact@v4
         with:
           name: semgrep-report
           path: semgrep.sarif
