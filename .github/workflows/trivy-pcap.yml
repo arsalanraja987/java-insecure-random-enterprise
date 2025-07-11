@@ -1,0 +1,31 @@
+name: Trivy + Outbound Traffic Monitor
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  trivy-pcap-job:
+    name: Trivy PCAP Monitor
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐳 Build Docker image
+        run: docker build -t outbound-monitor .
+
+      - name: 🚀 Run container and extract .pcap
+        run: |
+          docker run --name app-container outbound-monitor
+          docker cp app-container:/app/outbound_traffic.pcap ./outbound_traffic.pcap
+          docker rm app-container
+
+      - name: 📤 Upload .pcap file as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: outbound-traffic
+          path: outbound_traffic.pcap
