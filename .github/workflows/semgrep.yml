@@ -1,33 +1,31 @@
-name: Semgrep Static Code Analysis
+name: Semgrep Scan
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-  semgrep-scan:
-    name: Run Semgrep
+  semgrep:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python (for Semgrep)
-        uses: actions/setup-python@v4
+      - name: Run Semgrep scan and save results
+        uses: returntocorp/semgrep-action@v1
         with:
-          python-version: '3.x'
+          config: auto
+          generateSarif: true
+        env:
+          SEMGREP_RULES: auto
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
-      - name: Install Semgrep
-        run: pip install semgrep
-
-      - name: Run Semgrep scan
-        run: semgrep --config=auto --json > semgrep-report.json
-
-      - name: Upload Semgrep Report
-        uses: actions/upload-artifact@v4
+      - name: Upload Semgrep SARIF report
+        uses: actions/upload-artifact@v3
         with:
           name: semgrep-report
-          path: semgrep-report.json
+          path: semgrep.sarif
