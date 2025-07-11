@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: java-token-generator
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: ["java", "-cp", "out", "InsecureTokenGenerator"]
