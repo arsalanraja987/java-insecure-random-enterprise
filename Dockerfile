@@ -1,14 +1,19 @@
-# Use official OpenJDK base image
 FROM eclipse-temurin:17-jdk-jammy
+
+# Install tcpdump to monitor outbound traffic
+RUN apt-get update && \
+    apt-get install -y tcpdump && \
+    mkdir /app
+
+# Copy source and entrypoint
+COPY src/main/java/InsecureRandomGenerator.java /app/
+COPY entrypoint.sh /app/
 
 # Set working directory
 WORKDIR /app
 
-# Copy entire Java source directory into image
-COPY ./src /app/src
+# Compile Java code
+RUN javac InsecureRandomGenerator.java
 
-# Compile Java files
-RUN javac /app/src/main/java/*.java
-
-# Run the secure version by default
-CMD ["java", "-cp", "/app/src/main/java", "SecureTokenGenerator"]
+# Set entrypoint
+ENTRYPOINT ["sh", "entrypoint.sh"]
