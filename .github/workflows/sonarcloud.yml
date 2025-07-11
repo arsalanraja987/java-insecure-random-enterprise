@@ -36,3 +36,4 @@ jobs:
           args: >
             -Dsonar.organization=arsalanraja987
             -Dsonar.projectKey=arsalanraja987_java-insecure-random-enterprise
+            -Dsonar.java.binaries=.
