@@ -1,0 +1,12 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Vulnerable dependency to demonstrate remediation
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.10'
+}
