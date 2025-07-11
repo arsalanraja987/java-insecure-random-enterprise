@@ -1,0 +1,12 @@
+# Dockerfile.pcap
+FROM eclipse-temurin:17-jdk-jammy
+
+RUN apt-get update && apt-get install -y tcpdump && mkdir /app
+
+COPY entrypoint.sh /app/
+
+WORKDIR /app
+
+RUN chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
