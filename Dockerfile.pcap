@@ -1,12 +1,19 @@
-# Dockerfile.pcap
 FROM eclipse-temurin:17-jdk-jammy
 
-RUN apt-get update && apt-get install -y tcpdump && mkdir /app
+# Install tcpdump to monitor outbound traffic
+RUN apt-get update && \
+    apt-get install -y tcpdump && \
+    mkdir /app
 
+# Copy correct source file and entrypoint
+COPY src/main/java/InsecureTokenGenerator.java /app/
 COPY entrypoint.sh /app/
 
+# Set working directory
 WORKDIR /app
 
-RUN chmod +x /app/entrypoint.sh
+# Compile Java code
+RUN javac InsecureTokenGenerator.java
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Set entrypoint
+ENTRYPOINT ["sh", "entrypoint.sh"]
