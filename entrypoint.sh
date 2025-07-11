@@ -1,13 +1,25 @@
 #!/bin/bash
 
-echo "📡 Starting tcpdump to monitor outbound network calls..."
-tcpdump -i any -n -w /app/outbound_traffic.pcap &
+# Create output directory for PCAP if it doesn't exist
+mkdir -p /output
+
+# Start tcpdump in background to monitor all outbound traffic
+tcpdump -i any -w /output/traffic.pcap &
+
+# Save tcpdump PID so we can kill it later
 TCPDUMP_PID=$!
 
-echo "🚀 Running Java app..."
-java InsecureRandomGenerator
+# Wait briefly to ensure tcpdump starts
+sleep 2
 
-echo "✅ Java app finished. Stopping tcpdump..."
+# Run the insecure Java program
+java InsecureTokenGenerator
+
+# Give tcpdump some time to capture any last packets
+sleep 2
+
+# Stop tcpdump
 kill $TCPDUMP_PID
 
-echo "📁 Outbound traffic capture saved to: /app/outbound_traffic.pcap"
+# Wait for tcpdump to fully shut down
+wait $TCPDUMP_PID 2>/dev/null
