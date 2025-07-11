@@ -12,17 +12,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker image (PCAP version)
-        run: |
-          docker build -f Dockerfile.pcap -t outbound-monitor .
+        run: docker build -t outbound-monitor -f Dockerfile.pcap .
 
       - name: Run container and extract .pcap
         run: |
-          docker run --rm --cap-add=NET_ADMIN --name monitor outbound-monitor
-          mkdir -p ./pcap-output
-          docker cp monitor:/app/traffic.pcap ./pcap-output/ || true
+          mkdir -p pcap-output
+          docker run --rm --cap-add=NET_ADMIN --network=bridge \
+            -v ${{ github.workspace }}/pcap-output:/output \
+            outbound-monitor sh -c "tcpdump -i any -w /output/traffic.pcap & \
+            java InsecureTokenGenerator && pkill tcpdump && sleep 1"
 
       - name: Upload .pcap file as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: network-capture
+          name: traffic-capture
           path: ./pcap-output/traffic.pcap
