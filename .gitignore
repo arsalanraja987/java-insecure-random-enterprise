@@ -1,0 +1,16 @@
+# Ignore compiled class files
+*.class
+
+# Ignore JAR files
+*.jar
+
+# Ignore Sonar cache (optional)
+.sonar/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE configs (optional)
+.vscode/
+.idea/
