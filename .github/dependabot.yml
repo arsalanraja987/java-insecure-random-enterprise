@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "gradle"
-    directory: "/" # Location of your build.gradle file
+    directory: "."  # Corrected path to build.gradle
     schedule:
       interval: "daily"
     open-pull-requests-limit: 5
