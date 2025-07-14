@@ -1,45 +1,45 @@
 #!/bin/bash
 
-echo "🚀 Starting enterprise CVE remediation with safe fixed copies..."
+set -e
 
-##### STEP 1: Create fixed folders
-echo "📁 Creating folders for fixed versions..."
+echo "🚀 Starting fix.sh..."
+
+##### STEP 1: Create folders
 mkdir -p src/fixed/java
 mkdir -p src/fixed/gradle
 
-##### STEP 2: Copy all vulnerable files
-echo "📄 Copying vulnerable Java files to fixed folder..."
-cp src/main/java/RandomVuln*.java src/fixed/java/
-cp src/main/java/TikaVuln*.java src/fixed/java/
+##### STEP 2: Copy vulnerable files into fixed folders
+echo "📄 Copying vulnerable Java files to src/fixed/java/..."
+cp src/main/java/RandomVuln*.java src/fixed/java/ || echo "⚠️ No RandomVuln files found"
+cp src/main/java/TikaVuln*.java src/fixed/java/ || echo "⚠️ No TikaVuln files found"
 
-echo "📄 Copying vulnerable Gradle files to fixed folder..."
-cp src/main/java/gradle-vuln/*.build.gradle src/fixed/gradle/
+echo "📄 Copying vulnerable Gradle files to src/fixed/gradle/..."
+cp src/main/java/gradle-vuln/*.build.gradle src/fixed/gradle/ || echo "⚠️ No Gradle vuln files found"
 
-##### STEP 3: Fix CVE-2021-27568 - Insecure Randomness
-VULN_JAVA_DIR="src/fixed/java"
-echo "🔧 Fixing CVE-2021-27568: Insecure Randomness..."
+##### STEP 3: Fix Randomness (CVE-2021-27568)
+echo "🔧 Fixing CVE-2021-27568..."
 
-grep -rl 'new Random()' $VULN_JAVA_DIR | while read -r file; do
+grep -rl 'new Random()' src/fixed/java | while read -r file; do
   echo "🔍 Fixing 'new Random()' in $file"
   sed -i 's/new Random()/new SecureRandom()/g' "$file"
 done
 
-grep -rl 'Math.random()' $VULN_JAVA_DIR | while read -r file; do
+grep -rl 'Math.random()' src/fixed/java | while read -r file; do
   echo "🔍 Fixing 'Math.random()' in $file"
   sed -i 's/Math.random()/secureRandom.nextDouble()/g' "$file"
 done
 
-find $VULN_JAVA_DIR -type f -name "*.java" | while read -r file; do
+find src/fixed/java -name "*.java" | while read -r file; do
   if grep -q 'SecureRandom' "$file" && ! grep -q 'import java.security.SecureRandom;' "$file"; then
     echo "📎 Adding SecureRandom import to $file"
     sed -i '1i import java.security.SecureRandom;' "$file"
   fi
 done
 
-##### STEP 4: Fix CVE-2021-29425 - Apache Tika XXE
-echo "🔧 Fixing CVE-2021-29425: Apache Tika XXE..."
+##### STEP 4: Fix Apache Tika XXE (CVE-2021-29425)
+echo "🔧 Fixing CVE-2021-29425..."
 
-grep -rl 'AutoDetectParser' $VULN_JAVA_DIR | while read -r file; do
+grep -rl 'AutoDetectParser' src/fixed/java | while read -r file; do
   echo "🔍 Securing AutoDetectParser in $file"
   sed -i 's/new AutoDetectParser()/new AutoDetectParser(new SecureContentHandler())/g' "$file"
   grep -q 'setEntityResolver' "$file" || sed -i '/AutoDetectParser/ a \
@@ -48,15 +48,13 @@ parser.setEntityResolver(new org.xml.sax.helpers.DefaultHandler());' "$file"
   grep -q 'DefaultHandler' "$file" || sed -i '1i import org.xml.sax.helpers.DefaultHandler;' "$file"
 done
 
-##### STEP 5: Fix CVE-2021-29427 - Gradle Repository Filtering Bypass
-VULN_GRADLE_DIR="src/fixed/gradle"
-echo "🔧 Fixing CVE-2021-29427: Gradle filtering..."
+##### STEP 5: Fix Gradle Filtering (CVE-2021-29427)
+echo "🔧 Fixing CVE-2021-29427..."
 
-find $VULN_GRADLE_DIR -type f -name "*.gradle" | while read -r gradle_file; do
-  echo "🔍 Checking $gradle_file for repository issues..."
+find src/fixed/gradle -name "*.gradle" | while read -r gradle_file; do
+  echo "🔍 Patching $gradle_file..."
 
   if grep -q 'mavenCentral()' "$gradle_file" && ! grep -A2 'mavenCentral()' "$gradle_file" | grep -q 'content {'; then
-    echo "⚠️ Patching mavenCentral() in $gradle_file"
     sed -i '/mavenCentral()/a \
         content {\n\
             includeGroup "org.apache.tika"\n\
@@ -71,23 +69,21 @@ find $VULN_GRADLE_DIR -type f -name "*.gradle" | while read -r gradle_file; do
   }
   { print }
   ' "$gradle_file" > "$gradle_file.tmp" && mv "$gradle_file.tmp" "$gradle_file"
-
-  echo "✅ Patched $gradle_file"
 done
 
-##### STEP 6: Commit Fixed Files to GitHub
-echo "📦 Committing fixed files..."
+##### STEP 6: Git Commit & Push
+echo "📦 Committing src/fixed/..."
 
 git config --global user.name "AutoFix Bot"
 git config --global user.email "autofix@bot.com"
 git add src/fixed
 
-if ! git diff --cached --quiet; then
+if git diff --cached --quiet; then
+  echo "ℹ️ No changes to commit"
+else
   git commit -m "fix.sh: Added fixed versions for CVE remediation"
   git push
   echo "✅ Fixed files committed and pushed!"
-else
-  echo "ℹ️ No new changes to commit."
 fi
 
-echo "🎉 All CVEs fixed and results saved in src/fixed/"
+echo "✅ All vulnerabilities fixed and stored in src/fixed/"
