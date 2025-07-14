@@ -2,7 +2,7 @@
 
 echo "🧹 Cleaning up fixed files and folders..."
 
-# Check if the fixed folder exists before deleting
+# Check if the fixed folder exists
 if [ -d "src/fixed" ]; then
   rm -rf src/fixed
   echo "✅ Deleted src/fixed folder"
@@ -10,10 +10,11 @@ else
   echo "⚠️ No src/fixed folder to delete"
 fi
 
-# Set git identity
+# Git identity
 git config --global user.name "AutoFix Bot"
 git config --global user.email "autofix@bot.com"
 
-# Stage, commit, and push changes
+# Commit and push cleanup
 git add -A
-git commit -m "
+git commit -m "🧹 Cleanup: Removed all fixed versions"
+git push
