@@ -1,0 +1,12 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.tika:tika-core:1.24'
+    implementation 'com.google.guava:guava:30.1-jre'
+}
