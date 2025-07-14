@@ -1,10 +1,10 @@
-name: Run CVE Fix Script
+name: Trigger Fix Script
 
 on:
   workflow_dispatch:
 
 jobs:
-  fix:
+  run-fix:
     runs-on: ubuntu-latest
 
     steps:
