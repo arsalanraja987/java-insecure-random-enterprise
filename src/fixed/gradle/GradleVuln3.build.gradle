@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+        content {
+
+            includeGroup "org.apache.tika"
+
+            includeGroup "com.google.guava"
+
+        }
+
+    maven {
+        content {
+            includeGroup "org.apache.tika"
+            includeGroup "com.google.guava"
+        }
+        url 'https://jcenter.bintray.com'
+    }
+
+    maven {
+        content {
+            includeGroup "org.apache.tika"
+            includeGroup "com.google.guava"
+        }
+        url 'https://repo.spring.io/milestone'
+    }
+}
+
+dependencies {
+    implementation 'org.apache.tika:tika-core:1.24'
+    implementation 'com.google.guava:guava:30.1-jre'
+    implementation 'org.springframework:spring-core:5.3.9'
+}
