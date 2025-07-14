@@ -1,0 +1,19 @@
+name: Trigger Cleanup Script
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Make cleanup script executable
+        run: chmod +x clean_fixed.sh
+
+      - name: Run cleanup
+        run: ./clean_fixed.sh
