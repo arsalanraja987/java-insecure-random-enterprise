@@ -6,14 +6,16 @@ on:
 jobs:
   run-cleanup:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # ✅ allow pushing changes to the repo
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
       - name: Make cleanup script executable
-        run: chmod +x clean_fixed.sh
+        run: chmod +x ./clean_fixed.sh
 
       - name: Run cleanup
         run: ./clean_fixed.sh
