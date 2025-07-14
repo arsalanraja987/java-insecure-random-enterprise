@@ -1,0 +1,25 @@
+name: Delete Fixed Folder
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Delete src/fixed folder
+        run: |
+          echo "🧹 Deleting src/fixed folder..."
+          rm -rf src/fixed
+
+      - name: Commit deletion
+        run: |
+          git config --global user.name "Cleanup Bot"
+          git config --global user.email "cleanup@bot.com"
+          git add -A
+          git commit -m "Cleanup: removed src/fixed"
+          git push
