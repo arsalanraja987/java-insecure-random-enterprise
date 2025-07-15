@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 echo "🧹 Cleaning up fixed files and folders..."
 
 # Check if the fixed folder exists
@@ -10,11 +11,17 @@ else
   echo "⚠️ No src/fixed folder to delete"
 fi
 
-# Git identity
+# Git identity for commit
 git config --global user.name "AutoFix Bot"
 git config --global user.email "autofix@bot.com"
 
-# Commit and push cleanup
+# Stage, commit, and push changes
 git add -A
-git commit -m "🧹 Cleanup: Removed all fixed versions"
-git push
+
+if git diff --cached --quiet; then
+  echo "ℹ️ Nothing to commit after cleanup."
+else
+  git commit -m "🧹 Cleanup: Removed all fixed versions"
+  git push
+  echo "✅ Cleanup committed and pushed."
+fi
